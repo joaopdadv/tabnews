@@ -1,6 +1,6 @@
 import { Client } from "pg";
 
-async function query(queryObject) {
+async function query(queryObject, params) {
     const client = new Client({
         host: process.env.POSTGRES_HOST,
         port: process.env.POSTGRES_PORT,
@@ -10,10 +10,14 @@ async function query(queryObject) {
     });
     await client.connect();
 
-    const result = await client.query(queryObject);
-    await client.end();
-
-    return result;
+    try {
+        const result = await client.query(queryObject, params);
+        return result;
+    } catch (error) {
+        console.error("Database query error:", error);
+    } finally {
+        await client.end();
+    }
 }
 
 export default {
